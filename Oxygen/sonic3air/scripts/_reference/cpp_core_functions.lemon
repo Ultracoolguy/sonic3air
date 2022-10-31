@@ -155,6 +155,8 @@ declare function u8 Input.buttonPressed(u8 index)
 
 declare function void Input.setTouchInputMode(u8 index)
 
+declare function void Input.setControllerRumble(u8 playerIndex, u16 lowFrequencyRumble, u16 highFrequencyRumble, u32 milliseconds)
+
 declare function void Input.setControllerLEDs(u8 playerIndex, u32 color)
 
 declare function void yieldExecution()
