@@ -14,6 +14,9 @@ if (UNIX AND CMAKE_SYSTEM_PROCESSOR MATCHES "^arm")
 	link_directories(/opt/vc/lib)	# Needed when building on Rasperry Pi
 	set(USE_DISCORD false)
 endif()
+if (NINTENDO_SWITCH)
+	set(USE_DISCORD false)
+endif()
 message(STATUS "USE_DISCORD = ${USE_DISCORD}")
 
 
@@ -47,29 +50,50 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 
 endif()
 
-
 find_package(OpenGL REQUIRED)
 
+if (NINTENDO_SWITCH)
+	find_package(PkgConfig REQUIRED)
+	pkg_check_modules(GLAD REQUIRED libglad)
+	include_directories(${GLAD_INCLUDE_DIRS})
+	link_directories(${GLAD_LIBRARY_DIRS})
+endif()
 
 # SDL2 sources as virtual subdirectory "SDL"
+
 set(SDL_STATIC ON)
 set(SDL_SHARED OFF)
-add_subdirectory(${WORKSPACE_DIR}/framework/external/sdl/SDL2 SDL)
+if(NINTENDO_SWITCH)
+	pkg_check_modules(SDL2 REQUIRED sdl2)
+	include_directories(${SDL2_INCLUDE_DIRS})
+	link_directories(${SDL2_LIBRARY_DIRS})
+else()
+	add_subdirectory(${WORKSPACE_DIR}/framework/external/sdl/SDL2 SDL)
+	include_directories(SDL/include)
+endif()
+
+
 
 # zlib sources as virtual subdirectory "zlib"
-include_directories(${WORKSPACE_DIR}/framework/external/zlib/zlib)		# Included before add_subdirectory so that the examples will build
-add_subdirectory(${WORKSPACE_DIR}/framework/external/zlib/zlib zlib)
+if(NINTENDO_SWITCH)
+	pkg_check_modules(ZLIB REQUIRED zlib)
+	include_directories (${ZLIB_INCLUDE_DIRS})
+	link_directories (${ZLIB_LIBRARY_DIRS})
+else()
+	include_directories(${WORKSPACE_DIR}/framework/external/zlib/zlib)		# Included before add_subdirectory so that the examples will build
+	add_subdirectory(${WORKSPACE_DIR}/framework/external/zlib/zlib zlib)
+endif()
 
 
-
-include_directories(SDL/include)
-include_directories(${WORKSPACE_DIR}/framework/external/ogg-vorbis/libogg/include)
-include_directories(${WORKSPACE_DIR}/framework/external/ogg-vorbis/libvorbis/include)
-include_directories(${WORKSPACE_DIR}/framework/external/ogg-vorbis/libvorbis/lib)
-include_directories(build/zlib)		# Needed for zconf.h
-include_directories(${WORKSPACE_DIR}/framework/external/zlib/zlib/contrib/minizip)
+if (NOT NINTENDO_SWITCH)
+	include_directories(${WORKSPACE_DIR}/framework/external/ogg-vorbis/libogg/include)
+	include_directories(${WORKSPACE_DIR}/framework/external/ogg-vorbis/libvorbis/include)
+	include_directories(${WORKSPACE_DIR}/framework/external/ogg-vorbis/libvorbis/lib)
+	include_directories(build/zlib)		# Needed for zconf.h
+	include_directories(${WORKSPACE_DIR}/framework/external/zlib/zlib/contrib/minizip)
+endif()
 include_directories(${WORKSPACE_DIR}/librmx/source)
-include_directories(${WORKSPACE_DIR}/librmx/source/rmxmedia/_glew)
+#include_directories(${WORKSPACE_DIR}/librmx/source/rmxmedia/_glew)
 include_directories(${WORKSPACE_DIR}/Oxygen/lemonscript/source)
 include_directories(${WORKSPACE_DIR}/Oxygen/oxygenengine/source)
 include_directories(${WORKSPACE_DIR}/Oxygen/sonic3air/source)
@@ -81,23 +105,33 @@ include_directories(${WORKSPACE_DIR}/Oxygen/sonic3air/source/external)
 
 # TODO: I tried creating config_types.h by calling "./configure" by a add_custom_command,
 #       but that did not work; instead the solution is to simply add the generated file to versioning
+if (NINTENDO_SWITCH)
+	pkg_check_modules(VORBIS REQUIRED vorbis)
+	include_directories (${VORBIS_INCLUDE_DIRS})
+	link_directories (${VORBIS_LIBRARY_DIRS})
+else()
+	file(GLOB OGGVORBIS_SOURCES ${WORKSPACE_DIR}/framework/external/ogg-vorbis/libogg/src/*.c
+								${WORKSPACE_DIR}/framework/external/ogg-vorbis/libvorbis/lib/*.c)
 
-file(GLOB OGGVORBIS_SOURCES ${WORKSPACE_DIR}/framework/external/ogg-vorbis/libogg/src/*.c
-							${WORKSPACE_DIR}/framework/external/ogg-vorbis/libvorbis/lib/*.c)
-
-add_library(oggvorbis ${OGGVORBIS_SOURCES})
+	add_library(oggvorbis ${OGGVORBIS_SOURCES})
+endif()
 
 
 
 # minizip
+if (NINTENDO_SWITCH)
+	pkg_check_modules(MINIZIP REQUIRED minizip)
+	include_directories (${MINIZIP_INCLUDE_DIRS})
+	link_directories (${MINIZIP_LIBRARY_DIRS})
+else()
+	file(GLOB MINIZIP_SOURCES ${WORKSPACE_DIR}/framework/external/zlib/zlib/contrib/minizip/ioapi.c
+							  ${WORKSPACE_DIR}/framework/external/zlib/zlib/contrib/minizip/unzip.c
+							  ${WORKSPACE_DIR}/framework/external/zlib/zlib/contrib/minizip/zip.c)
 
-file(GLOB MINIZIP_SOURCES ${WORKSPACE_DIR}/framework/external/zlib/zlib/contrib/minizip/ioapi.c
-						  ${WORKSPACE_DIR}/framework/external/zlib/zlib/contrib/minizip/unzip.c
-						  ${WORKSPACE_DIR}/framework/external/zlib/zlib/contrib/minizip/zip.c)
+	add_library(minizip ${MINIZIP_SOURCES})
+	target_link_libraries(minizip zlibstatic)
+endif()
 
-add_library(minizip ${MINIZIP_SOURCES})
-
-target_link_libraries(minizip zlibstatic)
 
 
 
@@ -113,19 +147,32 @@ if (NOT CMAKE_VERSION VERSION_LESS "3.16.0")
 endif()
 
 target_link_libraries(rmxbase stdc++fs)
-target_link_libraries(rmxbase zlibstatic)
+if (NINTENDO_SWITCH)
+	target_link_libraries(rmxbase ${ZLIB_LIBRARIES})
+else()
+	target_link_libraries(rmxbase zlibstatic)
+endif()
 
 
 
 # rmxmedia
 
-file(GLOB RMXMEDIA_SOURCES ${WORKSPACE_DIR}/librmx/source/rmxmedia/*.cpp
-						   ${WORKSPACE_DIR}/librmx/source/rmxmedia/_glew/*.c)
+if (NINTENDO_SWITCH)
+	file(GLOB RMXMEDIA_SOURCES ${WORKSPACE_DIR}/librmx/source/rmxmedia/*.cpp)
 
+else()
+	file(GLOB RMXMEDIA_SOURCES ${WORKSPACE_DIR}/librmx/source/rmxmedia/*.cpp
+							   ${WORKSPACE_DIR}/librmx/source/rmxmedia/_glew/*.c)
+endif()
 add_library(rmxmedia ${RMXMEDIA_SOURCES})
 
 target_link_libraries(rmxmedia rmxbase)
-target_link_libraries(rmxmedia SDL2-static)
+if (NINTENDO_SWITCH)
+	target_link_libraries(rmxmedia ${SDL2_LIBRARIES})
+	target_link_libraries(rmxmedia ${GLAD_LIBRARIES})
+else()
+	target_link_libraries(rmxmedia SDL2-static)
+endif()
 target_link_libraries(rmxmedia ${OPENGL_gl_LIBRARY})
 
 
@@ -137,7 +184,11 @@ file(GLOB RMXEXT_OGGVORBIS_SOURCES ${WORKSPACE_DIR}/librmx/source/rmxext_oggvorb
 add_library(rmxext_oggvorbis ${RMXEXT_OGGVORBIS_SOURCES})
 
 target_link_libraries(rmxext_oggvorbis rmxmedia)
-target_link_libraries(rmxext_oggvorbis oggvorbis)
+if (NINTENDO_SWITCH)
+	target_link_libraries(rmxext_oggvorbis ${VORBIS_LIBRARIES})
+else()
+	target_link_libraries(rmxext_oggvorbis oggvorbis)
+endif()
 
 
 
@@ -179,7 +230,11 @@ if (NOT CMAKE_VERSION VERSION_LESS "3.16.0")
 	target_precompile_headers(oxygen PRIVATE ${WORKSPACE_DIR}/Oxygen/oxygenengine/source/oxygen/pch.h)
 endif()
 
-target_link_libraries(oxygen minizip)
+if (NINTENDO_SWITCH)
+	target_link_libraries(oxygen ${MINIZIP_LIBRARIES})
+else()
+	target_link_libraries(oxygen minizip)
+endif()
 target_link_libraries(oxygen rmxmedia)
 target_link_libraries(oxygen rmxext_oggvorbis)
 target_link_libraries(oxygen lemonscript)
@@ -239,6 +294,7 @@ if (UNIX AND NOT APPLE)
 	set_target_properties(Sonic3AIR PROPERTIES OUTPUT_NAME "sonic3air_linux")
 endif()
 
+# Comment if you are building a non-ENDUSER build, for example, for packing
 target_compile_definitions(Sonic3AIR PUBLIC ENDUSER)
 
 if (NOT CMAKE_VERSION VERSION_LESS "3.16.0")
@@ -248,4 +304,17 @@ endif()
 target_link_libraries(Sonic3AIR oxygen)
 if (USE_DISCORD)
 	target_link_libraries(Sonic3AIR discord_game_sdk_source)
+endif()
+
+if (NINTENDO_SWITCH)
+	set_property(TARGET Sonic3AIR PROPERTY OUTPUT_NAME "Sonic3AIR")
+	set(CMAKE_EXECUTABLE_SUFFIX ".elf")
+
+	set(NACP_OUTPUT ${CMAKE_BINARY_DIR}/Sonic3AIR.nacp)
+	set(AUTHOR "SEGA, Eukaryot, Ultracoolplayer")
+	set(VERSION "22.09.10.0")
+	nx_generate_nacp(OUTPUT ${NACP_OUTPUT} AUTHOR ${AUTHOR} VERSION ${VERSION})
+
+	set(ICON ${WORKSPACE_DIR}/Oxygen/sonic3air/___internal/icon/icon_switch.jpg)
+	nx_create_nro(Sonic3AIR NACP ${NACP_OUTPUT} ICON ${ICON})
 endif()

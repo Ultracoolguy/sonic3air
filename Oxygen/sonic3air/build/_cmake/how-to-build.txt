@@ -1,3 +1,4 @@
+NOTE: For ENDUSER builds you might need to build a non-ENDUSER build and pack before being able to build any of these versions
 
 === Build under Linux ===
 
@@ -32,3 +33,15 @@ Run S3AIR:
 Run Oxygen:
 	- cd Oxygen/oxygenengine
 	- ./oxygenapp_linux
+
+=== Build for Nintendo Switch ===
+Apart from switch-dev(which you should already have installed), you need SDL2, Vorbis, minizip, zlib(double check if we really need this), libglad, pkg-config and cmake(and maybe some other package, please tell me if I do). Install them by:
+
+	- sudo (dkp-)pacman -S switch-sdl2 switch-libvorbis switch-minizip switch-zlib switch-glad switch-pkg-config switch-cmake
+
+Afterwards:
+	- mkdir build && cd build
+	- $DEVKITPRO/portlibs/switch/bin/aarch64-none-elf-cmake ..
+	- make -j$(nproc)
+
+The nro will be at the root of the build directory, make sure to run it inside a folder with the rest of the files needed, see _master-image-template.
