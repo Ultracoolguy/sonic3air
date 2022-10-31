@@ -1,0 +1,13 @@
+external/curl/curl/build
+external/ogg-vorbis/libvorbis/win32/VS2010/Win32/
+external/ogg-vorbis/libvorbis/win32/VS2010/libvorbis/Win32/
+external/ogg-vorbis/libvorbis/win32/VS2010/libvorbis/x64/
+external/ogg-vorbis/libvorbis/win32/VS2010/libvorbisfile/Win32/
+external/ogg-vorbis/libvorbis/win32/VS2010/libvorbisfile/x64/
+external/ogg-vorbis/libvorbis/win32/VS2010/vorbisdec/Win32/
+external/ogg-vorbis/libvorbis/win32/VS2010/vorbisdec/x64/
+external/ogg-vorbis/libvorbis/win32/VS2010/x64/
+external/zlib/_vstudio/Debug/
+external/zlib/_vstudio/Release/
+external/zlib/_vstudio/x64/
+include/

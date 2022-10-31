@@ -1,0 +1,6 @@
+build/_cmake/build
+build/_vstudio/lib/
+build/_vstudio/tmp/
+_master_image_template/data/
+Sonic3AIR.*
+sonic3air_linux
