@@ -137,7 +137,7 @@ uint32 EngineMain::getPlatformFlags() const
 	else
 	{
 		uint32 flags = 0;
-	#if defined(PLATFORM_WINDOWS) || defined(PLATFORM_MAC) || defined(PLATFORM_LINUX)
+	#if defined(PLATFORM_WINDOWS) || defined(PLATFORM_MAC) || defined(PLATFORM_LINUX) || defined(__SWITCH__)
 		flags |= 0x0001;
 	#elif defined(PLATFORM_ANDROID) || defined(PLATFORM_WEB) || defined(PLATFORM_IOS)
 		flags |= 0x0002;
