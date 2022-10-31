@@ -4,6 +4,13 @@
 
 #include "oxygen/base/PlatformFunctions.h"
 
+#ifndef pathconf
+long pathconf(const char* path, int name)
+{
+	errno = ENOSYS;
+	return -1;
+}
+#endif
 
 #if defined(PLATFORM_WINDOWS) && !defined(__GNUC__)
 extern "C"
