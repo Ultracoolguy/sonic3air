@@ -1,6 +1,7 @@
 #!/bin/bash
-
+set -e
 pushd ../..
+echo $PWD
 
 DestDir=../_MASTER
 OutputDir=$DestDir/sonic3air_game
@@ -14,12 +15,12 @@ mkdir $DestDir
 
 
 # Make sure the needed binaries are all up-to-date
-
-svn up ../../librmx
-svn up ../../framework/external
-svn up ../lemonscript
-svn up ../oxygenengine
-svn up ../sonic3air
+# Uncomment if you didn't download this from GitHub
+#svn up ../../librmx
+#svn up ../../framework/external
+#svn up ../lemonscript
+#svn up ../oxygenengine
+#svn up ../sonic3air
 
 pushd ./build/_cmake/build
 	cmake -DCMAKE_BUILD_TYPE=Release ..
@@ -47,7 +48,7 @@ chmod +x $OutputDir/setup_linux.sh
 # Add Oxygen engine
 
 cp -r ../oxygenengine/_master_image_template $OutputDir/bonus/oxygenengine
-mkdir $OutputDir/data
+mkdir -p $OutputDir/data
 cp -r ../oxygenengine/data $OutputDir/bonus/oxygenengine/data
 
 cp ../oxygenengine/oxygenapp_linux $OutputDir/bonus/oxygenengine/
@@ -65,7 +66,10 @@ cp -r scripts $OutputDir/bonus/sonic3air_dev/scripts
 # Pack everything as a .tar.gz file
 
 pushd $DestDir
+	#Workaround
+	set +e
 	tar -czvf sonic3air_game.tar.gz sonic3air_game
+	set -e
 popd
 
 
