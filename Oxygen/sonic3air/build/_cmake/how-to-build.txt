@@ -26,6 +26,8 @@ Setup and build with CMake:
 
 For both, place a copy of the S3&K ROM "Sonic_Knuckles_wSonic3.bin" inside "Oxygen/sonic3air/___internal".
 
+NOTE: If you are running in Wayland, you may need to set variable SDL_VIDEODRIVER=x11
+
 Run S3AIR:
 	- cd Oxygen/sonic3air
 	- ./sonic3air_linux
