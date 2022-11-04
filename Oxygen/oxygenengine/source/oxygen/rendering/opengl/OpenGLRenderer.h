@@ -38,8 +38,8 @@ public:
 	void blurGameScreen();
 
 private:
-	void clearFullscreenBuffer(Framebuffer& buffer);
-	void clearFullscreenBuffers(Framebuffer& buffer1, Framebuffer& buffer2);
+	void clearFullscreenBuffer(rmx_Framebuffer& buffer);
+	void clearFullscreenBuffers(rmx_Framebuffer& buffer1, rmx_Framebuffer& buffer2);
 	void internalRefresh();
 	void renderGeometry(const Geometry& geometry);
 	void copyGameScreenToProcessingBuffer();
@@ -50,9 +50,9 @@ private:
 	Vec2i mGameResolution;
 
 	// Buffers & textures
-	Framebuffer	  mGameScreenBuffer;
+	rmx_Framebuffer	  mGameScreenBuffer;
 	Renderbuffer  mGameScreenDepth;
-	Framebuffer   mProcessingBuffer;
+	rmx_Framebuffer   mProcessingBuffer;
 	OpenGLTexture mProcessingTexture;
 
 	// Shaders

@@ -210,7 +210,7 @@ void OpenGLRenderer::blurGameScreen()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void OpenGLRenderer::clearFullscreenBuffer(Framebuffer& buffer)
+void OpenGLRenderer::clearFullscreenBuffer(rmx_Framebuffer& buffer)
 {
 	// Save current frame buffer and viewport
 	GLint previousFramebuffer = 0;
@@ -230,7 +230,7 @@ void OpenGLRenderer::clearFullscreenBuffer(Framebuffer& buffer)
 	glViewport(previousViewport[0], previousViewport[1], previousViewport[2], previousViewport[3]);
 }
 
-void OpenGLRenderer::clearFullscreenBuffers(Framebuffer& buffer1, Framebuffer& buffer2)
+void OpenGLRenderer::clearFullscreenBuffers(rmx_Framebuffer& buffer1, rmx_Framebuffer& buffer2)
 {
 	// Save current frame buffer and viewport
 	GLint previousFramebuffer = 0;

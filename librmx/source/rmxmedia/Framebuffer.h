@@ -33,11 +33,11 @@ private:
 };
 
 
-class API_EXPORT Framebuffer
+class API_EXPORT rmx_Framebuffer
 {
 public:
-	Framebuffer();
-	~Framebuffer();
+	rmx_Framebuffer();
+	~rmx_Framebuffer();
 
 	void create();
 	void create(int width, int height);

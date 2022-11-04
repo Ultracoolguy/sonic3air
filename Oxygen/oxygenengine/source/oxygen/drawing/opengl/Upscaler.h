@@ -27,7 +27,7 @@ private:
 	Shader mUpscalerHQ3xShader;
 	Shader mUpscalerHQ4xShader;
 
-	Framebuffer mPass0Buffer;
+	rmx_Framebuffer mPass0Buffer;
 	OpenGLTexture mPass0Texture;
 	OpenGLTexture mLookupTexture[3];
 };

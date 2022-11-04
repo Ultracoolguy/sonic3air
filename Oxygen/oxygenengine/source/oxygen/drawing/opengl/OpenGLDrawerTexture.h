@@ -33,5 +33,5 @@ public:
 
 private:
 	OpenGLTexture mTexture;
-	Framebuffer mFrameBuffer;	// Only used if this is a render target
+	rmx_Framebuffer mFrameBuffer;	// Only used if this is a render target
 };

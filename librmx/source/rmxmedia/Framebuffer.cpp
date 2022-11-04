@@ -70,35 +70,35 @@ void Renderbuffer::destroy()
 
 /* ----- Framebuffer ----------------------------------------------------------------------------------------------- */
 
-Framebuffer::Framebuffer()
+rmx_Framebuffer::rmx_Framebuffer()
 {
 }
 
-Framebuffer::~Framebuffer()
+rmx_Framebuffer::~rmx_Framebuffer()
 {
 	destroy();
 }
 
-void Framebuffer::create()
+void rmx_Framebuffer::create()
 {
 	if (mHandle == 0)
 		glGenFramebuffers(1, &mHandle);
 }
 
-void Framebuffer::create(int width, int height)
+void rmx_Framebuffer::create(int width, int height)
 {
 	create();
 	setSize(width, height);
 }
 
-void Framebuffer::finishCreation()
+void rmx_Framebuffer::finishCreation()
 {
 	// Just do some final checks
 	const GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 	RMX_CHECK(status == GL_FRAMEBUFFER_COMPLETE, "Failed to create framebuffer with error: " << rmx::hexString(status, 4) << " (OpenGL error: " << getGLErrorDescription(glGetError()) << ")", );
 }
 
-void Framebuffer::destroy()
+void rmx_Framebuffer::destroy()
 {
 	if (!mRenderbuffers.empty())
 	{
@@ -115,7 +115,7 @@ void Framebuffer::destroy()
 	}
 }
 
-void Framebuffer::setSize(int width, int height)
+void rmx_Framebuffer::setSize(int width, int height)
 {
 	if (width == mWidth && height == mHeight)
 		return;
@@ -131,27 +131,27 @@ void Framebuffer::setSize(int width, int height)
 	}
 }
 
-void Framebuffer::attachTexture(GLenum attachment, GLuint handle, GLenum texTarget)
+void rmx_Framebuffer::attachTexture(GLenum attachment, GLuint handle, GLenum texTarget)
 {
 	deleteAttachedBuffer(attachment);
 	bind();
 	glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, texTarget, handle, 0);
 }
 
-void Framebuffer::attachTexture(GLenum attachment, const Texture* texture, GLenum texTarget)
+void rmx_Framebuffer::attachTexture(GLenum attachment, const Texture* texture, GLenum texTarget)
 {
 	if (texture)
 		attachTexture(attachment, texture->getHandle(), texTarget);
 }
 
-void Framebuffer::attachRenderbuffer(GLenum attachment, GLuint handle)
+void rmx_Framebuffer::attachRenderbuffer(GLenum attachment, GLuint handle)
 {
 	deleteAttachedBuffer(attachment);
 	bind();
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment, GL_RENDERBUFFER, handle);
 }
 
-void Framebuffer::createRenderbuffer(GLenum attachment, GLenum internalformat)
+void rmx_Framebuffer::createRenderbuffer(GLenum attachment, GLenum internalformat)
 {
 	Renderbuffer* renderbuffer = nullptr;
 	Renderbuffer** found = mapFind(mRenderbuffers, attachment);
@@ -169,7 +169,7 @@ void Framebuffer::createRenderbuffer(GLenum attachment, GLenum internalformat)
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment, GL_RENDERBUFFER, renderbuffer->getHandle());
 }
 
-void Framebuffer::bind()
+void rmx_Framebuffer::bind()
 {
 	if (mHandle && !glIsFramebuffer(mHandle))
 		mHandle = 0;
@@ -178,30 +178,30 @@ void Framebuffer::bind()
 	glBindFramebuffer(GL_FRAMEBUFFER, mHandle);
 }
 
-void Framebuffer::unbind()
+void rmx_Framebuffer::unbind()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void Framebuffer::activate()
+void rmx_Framebuffer::activate()
 {
 	bind();
 	if (mWidth > 0 && mHeight > 0)
 		glViewport(0, 0, mWidth, mHeight);
 }
 
-void Framebuffer::activate(GLbitfield clearmask)
+void rmx_Framebuffer::activate(GLbitfield clearmask)
 {
 	activate();
 	glClear(clearmask);
 }
 
-void Framebuffer::deactivate()
+void rmx_Framebuffer::deactivate()
 {
 	unbind();
 }
 
-void Framebuffer::deleteAttachedBuffer(GLenum attachment)
+void rmx_Framebuffer::deleteAttachedBuffer(GLenum attachment)
 {
 	const auto it = mRenderbuffers.find(attachment);
 	if (it != mRenderbuffers.end())
