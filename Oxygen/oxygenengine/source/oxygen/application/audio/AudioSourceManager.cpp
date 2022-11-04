@@ -6,6 +6,7 @@
 *	or https://www.gnu.org/licenses/gpl-3.0.en.html
 */
 
+#include "OggAudioSource.h"
 #include "oxygen/pch.h"
 #include "oxygen/application/audio/AudioSourceManager.h"
 #include "oxygen/application/audio/EmulationAudioSource.h"
@@ -20,6 +21,14 @@ void AudioSourceManager::clear()
 	// Now it's safe to destroy all the audio sources
 	for (AudioSourceBase* audioSource : mAudioSources)
 	{
+		if (audioSource->isEmulationAudioSource()) {
+			EmulationAudioSource& emulationAudioSource = static_cast<EmulationAudioSource&>(*audioSource);
+			emulationAudioSource.~EmulationAudioSource();
+		}
+		else {
+			OggAudioSource& oggAudioSource = static_cast<OggAudioSource&>(*audioSource);
+			oggAudioSource.~OggAudioSource();
+		}
 		delete audioSource;
 	}
 	mAudioSources.clear();

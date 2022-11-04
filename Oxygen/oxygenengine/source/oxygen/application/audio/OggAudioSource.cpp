@@ -31,8 +31,8 @@ OggAudioSource::~OggAudioSource()
 	}
 	SDL_DestroyMutex(mMutex);
 
-	SAFE_DELETE(mOggLoader);
-	SAFE_DELETE(mInputStream);
+	/*SAFE_DELETE(mOggLoader);
+	SAFE_DELETE(mInputStream);*/
 }
 
 bool OggAudioSource::load(const std::wstring& filename)
