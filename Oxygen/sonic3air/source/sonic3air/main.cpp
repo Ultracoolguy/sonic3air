@@ -12,7 +12,80 @@
 
 #include "oxygen/base/PlatformFunctions.h"
 #include "oxygen/file/FilePackage.h"
+#ifdef PLATFORM_SWITCH
+#include <switch.h>
 
+extern "C" {
+
+extern char __start__;
+extern char __rodata_start;
+
+void HandleFault(uint64_t pc, uint64_t lr, uint64_t fp, uint64_t faultAddr,
+                 uint32_t desc) {
+  if (pc >= (uint64_t)&__start__ && pc < (uint64_t)&__rodata_start) {
+    printf(
+        "unintentional fault in .text at %p (type %d) (trying to access %p?)\n",
+        (void *)(pc - (uint64_t)&__start__), desc, (void *)faultAddr);
+
+    int frameNum = 0;
+    while (true) {
+      printf("stack frame %d %p\n", frameNum,
+             (void *)(lr - (uint64_t)&__start__));
+      lr = *(uint64_t *)(fp + 8);
+      fp = *(uint64_t *)fp;
+
+      frameNum++;
+      if (frameNum > 16 || fp == 0 || (fp & 0x7) != 0)
+        break;
+    }
+  } else {
+    printf("unintentional fault somewhere in deep (address) space at %p (type "
+           "%d)\n",
+           (void *)pc, desc);
+    if (lr >= (uint64_t)&__start__ && lr < (uint64_t)&__rodata_start)
+      printf("lr in range: %p\n", (void *)(lr - (uint64_t)&__start__));
+  }
+}
+
+void QuickContextRestore(u64 *) __attribute__((noreturn));
+
+alignas(16) uint8_t __nx_exception_stack[0x8000];
+uint64_t __nx_exception_stack_size = 0x8000;
+
+void __libnx_exception_handler(ThreadExceptionDump *ctx) {
+  HandleFault(ctx->pc.x, ctx->lr.x, ctx->fp.x, ctx->far.x, ctx->error_desc);
+}
+}
+
+#include <unistd.h>
+#define TRACE(fmt, ...)                                                        \
+  printf("%s: " fmt "\n", __PRETTY_FUNCTION__, ##__VA_ARGS__)
+
+static int s_nxlinkSock = -1;
+
+static void initNxLink() {
+  if (R_FAILED(socketInitializeDefault()))
+    return;
+
+  s_nxlinkSock = nxlinkStdio();
+  if (s_nxlinkSock >= 0)
+    TRACE("printf output now goes to nxlink server");
+  else
+    socketExit();
+}
+
+static void deinitNxLink() {
+  if (s_nxlinkSock >= 0) {
+    close(s_nxlinkSock);
+    socketExit();
+    s_nxlinkSock = -1;
+  }
+}
+
+extern "C" void userAppInit() { initNxLink(); }
+
+extern "C" void userAppExit() { deinitNxLink(); }
+#endif
 
 // HJW: I know it's sloppy to put this here... it'll get moved afterwards
 // Building with my env (msys2,gcc) requires this stub for some reason
